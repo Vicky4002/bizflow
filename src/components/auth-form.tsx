@@ -1,0 +1,18 @@
+"use client";
+import { useState } from "react";
+import { authClient } from "@/lib/auth/client";
+export default function AuthForm() {
+ const [mode,setMode]=useState<"signin"|"signup">("signup"),[name,setName]=useState(""),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[confirm,setConfirm]=useState(""),[error,setError]=useState(""),[message,setMessage]=useState(""),[busy,setBusy]=useState(false);
+ async function submit(e:React.FormEvent){e.preventDefault();setError("");setMessage("");if(mode==="signup"&&password!==confirm){setError("Passwords do not match.");return;}if(password.length<8){setError("Use at least 8 characters for your password.");return;}setBusy(true);try{const r=mode==="signup"?await authClient.signUp.email({email,password,name:name.trim()}):await authClient.signIn.email({email,password});if(r.error)setError(r.error.message||"Authentication failed.");else if(mode==="signup")setMessage("Account created. Check your email for the verification code, then sign in.");else window.location.assign("/dashboard");}catch{setError("Unable to connect. Please try again.");}finally{setBusy(false);}}
+ async function google(){setError("");setBusy(true);try{const r=await authClient.signIn.social({provider:"google",callbackURL:"/dashboard"});if(r.error)setError(r.error.message||"Google sign-in could not start.");}catch{setError("Google sign-in is not configured yet. Use email and password.");}finally{setBusy(false);}}
+ return <section className="auth-card"><div className="eyebrow">WELCOME TO BIZFLOW</div><h1>{mode==="signup"?"Create your workspace":"Welcome back"}</h1><p className="muted">{mode==="signup"?"Start with a secure account. Your business data stays private.":"Sign in to continue to your business."}</p>
+ <button className="google-btn" onClick={google} disabled={busy}><span className="google-mark">G</span> Continue with Google</button><div className="or-divider"><span>or use email</span></div>
+ <form onSubmit={submit} className="auth-form">{mode==="signup"&&<label>Your name<input value={name} onChange={e=>setName(e.target.value)} required minLength={2} maxLength={100} autoComplete="name" placeholder="Your full name"/></label>}
+ <label>Email address<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required maxLength={254} autoComplete="email" placeholder="you@example.com"/></label>
+ <label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={8} autoComplete={mode==="signup"?"new-password":"current-password"} placeholder="At least 8 characters"/></label>
+ {mode==="signup"&&<label>Confirm password<input type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} required minLength={8} autoComplete="new-password" placeholder="Enter your password again"/></label>}
+ {error&&<p className="form-error" role="alert">{error}</p>}{message&&<p className="form-success" role="status">{message}</p>}
+ <button className="primary-btn full-btn" disabled={busy}>{busy?"Please wait…":mode==="signup"?"Create account":"Sign in"} <span>→</span></button></form>
+ <p className="switch-auth">{mode==="signup"?"Already have an account?":"New to BizFlow?"} <button onClick={()=>{setMode(mode==="signup"?"signin":"signup");setError("");setMessage("");}}>{mode==="signup"?"Sign in":"Create an account"}</button></p>
+ <p className="auth-legal">Keep your login details private and secure.</p></section>;
+}
