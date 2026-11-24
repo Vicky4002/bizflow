@@ -1,28 +1,28 @@
 # BizFlow
 
-BizFlow is a lightweight business workspace for managing customers, services, appointments and invoices.
+BizFlow is a business workspace for managing customers, services, appointments and invoices.
 
 ## Stack
-- Next.js 16 / React 19 / TypeScript
-- Neon Managed Auth (Better Auth) for email/password and Google OAuth
-- Neon PostgreSQL with row-level security
-- Vercel deployment
+- Next.js 16, React 19 and TypeScript
+- Neon Managed Auth (Better Auth)
+- Neon PostgreSQL with forced row-level security
+- Vercel Git deployments
 
 ## Local development
-1. Enter the application directory: `cd src`
-2. Install dependencies: `npm install`
-3. Add the environment variables below to `.env.local`
-4. Run `npm run dev`
+1. Run `cd src`.
+2. Install with `npm install`.
+3. Copy `.env.example` to `.env.local` and fill in the three required values.
+4. Run `npm run dev`.
 
-## Required environment variables
-- `DATABASE_URL` — restricted application database role connection string
-- `NEON_AUTH_BASE_URL` — Neon Auth URL for the production branch
-- `NEON_AUTH_COOKIE_SECRET` — long random secret (32+ characters)
+## Environment
+- `DATABASE_URL`: restricted `bizflow_runtime` PostgreSQL role connection string. Do not use the database owner URL.
+- `NEON_AUTH_BASE_URL`: Neon Managed Auth URL for the production branch.
+- `NEON_AUTH_COOKIE_SECRET`: a random secret of at least 32 characters.
 
-Do not commit environment files or credentials. Configure secrets in Vercel Project Settings.
+Never commit `.env.local` or credentials. Configure environment variables in Vercel Project Settings.
 
-## Deploy
-The Vercel project root directory should be `src`. Pushes to the production branch build and deploy automatically.
+## Deployment
+The Vercel project is linked to this GitHub repository. Its root directory is `src`; pushes to `main` trigger deployments.
 
-## Data protection
-All business data is queried server-side. API handlers require an authenticated session, use parameterized SQL, establish the user context inside a database transaction, and rely on forced PostgreSQL row-level security policies for tenant isolation.
+## Security model
+All business data is queried server-side. API handlers require an authenticated session, use parameterized SQL, establish the authenticated user context inside a database transaction, and rely on forced PostgreSQL row-level security policies for tenant isolation.
